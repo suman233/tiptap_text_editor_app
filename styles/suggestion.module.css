@@ -1,0 +1,27 @@
+.editor {
+    padding: 0.5rem;
+    border: 1px solid grey;
+    outline: none;
+  }
+  
+  .paragraph {
+    margin-top: 0;
+  }
+  
+  .mentionsContainer {
+    max-height: 40vh;
+    border-radius: 0.25rem;
+    background-color: #ffffff;
+    box-shadow: 0 2px 3px 1px rgba(0, 0, 0, 0.15);
+    overflow: auto;
+  }
+  
+  .mentionsItem {
+    padding: 0.25rem;
+    cursor: pointer;
+  }
+  
+  .mentionNode {
+    color: cornflowerblue;
+  }
+  

@@ -1,4 +1,4 @@
-import { useEditor, EditorContent, Editor, BubbleMenu } from "@tiptap/react";
+import { useEditor, EditorContent, Editor, BubbleMenu, FloatingMenu, ReactRenderer } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import React, { useCallback } from "react";
 import Paragraph from "@tiptap/extension-paragraph";
@@ -15,11 +15,16 @@ import { Color } from "@tiptap/extension-color";
 import TextStyle from "@tiptap/extension-text-style";
 import Dropcursor from "@tiptap/extension-dropcursor";
 // import Youtube from "@tiptap/extension-youtube";
-
+// import suggestion from '../Suggestion.tsx'
 import classNames from "classnames";
 import Image from "@tiptap/extension-image";
 import { Button } from "@mui/material";
-
+import CharacterCount from "@tiptap/extension-character-count";
+import Mention from "@tiptap/extension-mention";
+// import * as Suggestion from '../Suggestion/Suggestion'
+import suggestion from '../Suggestion/Suggestion'
+import { MentionList } from "../Mention/MentionList";
+// import "./Tiptap.scss";
 const content = `
 <p>With the History extension the Editor will keep track of your changes. And if you think you made a mistake, you can redo your changes. Try it out, change the content and hit the undo button!</p>
 <p>And yes, you can also use a keyboard shortcut to undo changes (Control/Cmd Z) or redo changes (Control/Cmd Shift Z).</p>
@@ -51,13 +56,52 @@ const TextEditor = () => {
       Strike,
       Code,
       Image,
-      Dropcursor
-     
+      Dropcursor,
+      CharacterCount,
+      Mention.configure({
+        HTMLAttributes: { class: "mentionNode" },
+        suggestion: {
+          render: () => {
+            let reactRenderer: ReactRenderer;
+
+            return {
+              onStart: (props) => {
+                reactRenderer = new ReactRenderer(MentionList, {
+                  props,
+                  editor: props.editor
+                });
+              },
+
+              onUpdate(props) {
+                reactRenderer?.updateProps(props);
+              },
+
+              onKeyDown(props) {
+                if (props.event.key === "Escape") {
+                  reactRenderer?.destroy();
+                  return true;
+                }
+
+                return (reactRenderer?.ref as any)?.onKeyDown(props);
+              },
+
+              onExit() {
+                reactRenderer.destroy();
+              }
+            };
+          }
+        }
+      })
     ],
     content,
    
   }) as Editor;
 
+  let limit: number = 280
+
+  const percentage = editor
+  ? Math.round((100 / limit) * editor.storage.characterCount.characters())
+  : 0
   const toggleBold = useCallback(() => {
     editor.chain().focus().toggleBold().run();
   }, [editor]);
@@ -288,6 +332,7 @@ const TextEditor = () => {
       {/* <MenuBar editor={editor}/> */}
       
       <EditorContent editor={editor} />
+      
     </div>
   );
 };
